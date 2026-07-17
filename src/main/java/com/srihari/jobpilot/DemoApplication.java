@@ -1,6 +1,5 @@
 package com.srihari.jobpilot;
 
-import com.srihari.jobpilot.entity.Job;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
