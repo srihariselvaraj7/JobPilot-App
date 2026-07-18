@@ -3,10 +3,10 @@ import com.srihari.jobpilot.entity.Job;
 import com.srihari.jobpilot.service.JobService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/jobs")
@@ -23,6 +23,16 @@ public class JobController {
         Job savedJob = jobService.saveJob(job);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(savedJob);
+    }
+
+    @GetMapping
+    public List<Job> findAllJobs(){
+        return jobService.getAllJobs();
+    }
+
+    @GetMapping("/{id}")
+    public Job findJobById(@PathVariable int id){
+        return jobService.getJobById(id);
     }
 
 }
