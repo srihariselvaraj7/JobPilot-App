@@ -1,11 +1,10 @@
 package com.srihari.jobpilot.service;
 import com.srihari.jobpilot.entity.Job;
+import com.srihari.jobpilot.exception.JobNotFoundException;
 import com.srihari.jobpilot.repository.JobRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 public class JobService {
@@ -26,6 +25,31 @@ public class JobService {
 
     public Job getJobById(int id) {
         return jobRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Job not found with id: " + id));
+                .orElseThrow(() -> new JobNotFoundException("Job not found with id: " + id));
+    }
+
+    public Job updateJob(int id, Job updatedJob){
+
+        Job existingJob = jobRepository.findById(id)
+                .orElseThrow(() ->
+                        new JobNotFoundException("Job not found with id: " + id));
+
+        existingJob.setTitle(updatedJob.getTitle());
+        existingJob.setCompany(updatedJob.getCompany());
+        existingJob.setLocation(updatedJob.getLocation());
+        existingJob.setSalary(updatedJob.getSalary());
+        existingJob.setDescription(updatedJob.getDescription());
+        existingJob.setEmploymentType(updatedJob.getEmploymentType());
+        existingJob.setWorkMode(updatedJob.getWorkMode());
+
+        return jobRepository.save(existingJob);
+    }
+
+    public void deleteJobById(int id){
+        Job existingJob = jobRepository.findById(id)
+                .orElseThrow(() ->
+                        new JobNotFoundException("Job not found with id: " + id));
+
+        jobRepository.delete(existingJob);
     }
 }
