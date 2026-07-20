@@ -3,11 +3,15 @@ package com.srihari.jobpilot.exception;
 import com.srihari.jobpilot.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -19,8 +23,31 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.NOT_FOUND.value(),
                 exception.getMessage(),
-                webRequest.getDescription(false)
+                webRequest.getDescription(false),
+                null
         );
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(
+            MethodArgumentNotValidException exception,
+            WebRequest webRequest) {
+        Map<String, String> errors = new HashMap<>();
+        for (FieldError error : exception.getBindingResult().getFieldErrors()) {
+            errors.put(
+                    error.getField(),
+                    error.getDefaultMessage()
+            );
+        }
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "Validation Failed",
+                webRequest.getDescription(false),
+                errors
+        );
+        return ResponseEntity.badRequest()
+                .body(errorResponse);
     }
 }
