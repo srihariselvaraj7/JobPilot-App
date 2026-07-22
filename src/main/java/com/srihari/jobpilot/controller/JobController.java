@@ -26,13 +26,13 @@ public class JobController {
     }
 
     @GetMapping
-    public List<Job> findAllJobs(){
-        return jobService.getAllJobs();
+    public ResponseEntity<List<Job>> findAllJobs(){
+        return ResponseEntity.ok(jobService.getAllJobs());
     }
 
     @GetMapping("/{id}")
-    public Job findJobById(@PathVariable int id){
-        return jobService.getJobById(id);
+    public ResponseEntity<Job> findJobById(@PathVariable int id){
+        return ResponseEntity.ok(jobService.getJobById(id));
     }
 
     @PutMapping("/{id}")
@@ -43,9 +43,9 @@ public class JobController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteJob(@PathVariable int id){
+    public ResponseEntity<String> deleteJob(@PathVariable int id){
         jobService.deleteJobById(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Job deleted successfully.");
     }
 
 }
