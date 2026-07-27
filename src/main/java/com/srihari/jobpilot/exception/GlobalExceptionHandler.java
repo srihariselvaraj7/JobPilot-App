@@ -77,4 +77,19 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
+
+    @ExceptionHandler(ResumeNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleResumeNotFoundException(
+            ResumeNotFoundException exception,
+            WebRequest webRequest) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.NOT_FOUND.value(),
+                exception.getMessage(),
+                webRequest.getDescription(false),
+                null
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
 }
