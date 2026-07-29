@@ -60,4 +60,7 @@ public class User {
 
     @OneToOne(mappedBy = "user")
     private Resume resume;
+
+    @OneToOne(mappedBy = "user")
+    private UserPreference userPreference;
 }

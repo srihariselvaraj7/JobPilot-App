@@ -92,4 +92,34 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
+
+    @ExceptionHandler(UserPreferenceAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleUserPreferenceAlreadyExistsException(
+            UserPreferenceAlreadyExistsException exception,
+            WebRequest webRequest) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                exception.getMessage(),
+                webRequest.getDescription(false),
+                null
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
+    @ExceptionHandler(UserPreferenceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserPreferenceNotFoundException(
+            UserPreferenceNotFoundException exception,
+            WebRequest webRequest) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.NOT_FOUND.value(),
+                exception.getMessage(),
+                webRequest.getDescription(false),
+                null
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
 }
