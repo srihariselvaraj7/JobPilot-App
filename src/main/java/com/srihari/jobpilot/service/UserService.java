@@ -1,8 +1,12 @@
 package com.srihari.jobpilot.service;
+
+import com.srihari.jobpilot.dto.UserRequestDto;
+import com.srihari.jobpilot.dto.UserResponseDto;
 import com.srihari.jobpilot.entity.Role;
 import com.srihari.jobpilot.entity.User;
 import com.srihari.jobpilot.exception.UserAlreadyExistsException;
 import com.srihari.jobpilot.exception.UserNotFoundException;
+import com.srihari.jobpilot.mapper.UserMapper;
 import com.srihari.jobpilot.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,62 +18,87 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
     public UserService(UserRepository userRepository,
-                       PasswordEncoder passwordEncoder) {
+                       PasswordEncoder passwordEncoder,
+                       UserMapper userMapper) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userMapper = userMapper;
     }
 
-    public User saveUser(User user){
+    public UserResponseDto saveUser(UserRequestDto userRequestDto) {
 
-        if(userRepository.existsByEmail(user.getEmail())){
+        if (userRepository.existsByEmail(userRequestDto.getEmail())) {
             throw new UserAlreadyExistsException(
-                    "Email already exists: " + user.getEmail());
+                    "Email already exists: " + userRequestDto.getEmail());
         }
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        User user = userMapper.toEntity(userRequestDto);
+        user.setPassword(
+                passwordEncoder.encode(user.getPassword())
+        );
         user.setRole(Role.USER);
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        return userMapper.toResponseDto(savedUser);
     }
 
-    public List<User> getAllUser(){
-        return userRepository.findAll();
+    public List<UserResponseDto> getAllUser() {
+
+        return userRepository.findAll()
+                .stream()
+                .map(userMapper::toResponseDto)
+                .toList();
     }
 
-    public User getUserById(int id){
-        return userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User not found with id: "+id));
+    public UserResponseDto getUserById(int id) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() ->
+                        new UserNotFoundException(
+                                "User not found with id: " + id));
+
+        return userMapper.toResponseDto(user);
     }
 
-    public User updateUser(User updatedUser, int id){
-        User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User not found with id: "+id));
+    public UserResponseDto updateUser(UserRequestDto updatedUserDto, int id) {
 
-        if (!existingUser.getEmail().equals(updatedUser.getEmail())
-                && userRepository.existsByEmail(updatedUser.getEmail())) {
-            throw new UserAlreadyExistsException(
-                    "Email already exists: " + updatedUser.getEmail()
-            );
-        }
-
-        existingUser.setName(updatedUser.getName());
-        existingUser.setEmail(updatedUser.getEmail());
-        existingUser.setPhone(updatedUser.getPhone());
-
-        if (updatedUser.getPassword() != null &&
-                !updatedUser.getPassword().isBlank()) {
-            existingUser.setPassword(
-                    passwordEncoder.encode(updatedUser.getPassword())
-            );
-        }
-
-        return userRepository.save(existingUser);
-    }
-
-    public void deleteUserById(int id){
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() ->
-                        new UserNotFoundException("User not found with id: "+id));
+                        new UserNotFoundException(
+                                "User not found with id: " + id));
+
+        if (!existingUser.getEmail().equals(updatedUserDto.getEmail())
+                && userRepository.existsByEmail(updatedUserDto.getEmail())) {
+
+            throw new UserAlreadyExistsException(
+                    "Email already exists: " + updatedUserDto.getEmail()
+            );
+        }
+
+        existingUser.setName(updatedUserDto.getName());
+        existingUser.setEmail(updatedUserDto.getEmail());
+        existingUser.setPhone(updatedUserDto.getPhone());
+
+        if (updatedUserDto.getPassword() != null
+                && !updatedUserDto.getPassword().isBlank()) {
+
+            existingUser.setPassword(
+                    passwordEncoder.encode(updatedUserDto.getPassword())
+            );
+        }
+
+        User savedUser = userRepository.save(existingUser);
+        return userMapper.toResponseDto(savedUser);
+    }
+
+    public void deleteUserById(int id) {
+
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() ->
+                        new UserNotFoundException(
+                                "User not found with id: " + id));
 
         userRepository.delete(existingUser);
     }

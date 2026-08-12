@@ -1,9 +1,11 @@
 package com.srihari.jobpilot.service;
 
+import com.srihari.jobpilot.dto.ResumeResponseDto;
 import com.srihari.jobpilot.entity.Resume;
 import com.srihari.jobpilot.entity.User;
 import com.srihari.jobpilot.exception.ResumeNotFoundException;
 import com.srihari.jobpilot.exception.UserNotFoundException;
+import com.srihari.jobpilot.mapper.ResumeMapper;
 import com.srihari.jobpilot.repository.ResumeRepository;
 import com.srihari.jobpilot.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,33 +24,47 @@ public class ResumeService {
 
     private final ResumeRepository resumeRepository;
     private final UserRepository userRepository;
+    private final ResumeMapper resumeMapper;
 
     @Autowired
-    public ResumeService(ResumeRepository resumeRepository,
-                         UserRepository userRepository){
-        this.resumeRepository=resumeRepository;
-        this.userRepository=userRepository;
+    public ResumeService(
+            ResumeRepository resumeRepository,
+            UserRepository userRepository,
+            ResumeMapper resumeMapper) {
+
+        this.resumeRepository = resumeRepository;
+        this.userRepository = userRepository;
+        this.resumeMapper = resumeMapper;
     }
 
-    public Resume uploadResume(MultipartFile file, Integer userId) throws IOException {
+    public ResumeResponseDto uploadResume(
+            MultipartFile file,
+            Integer userId) throws IOException {
 
-        //1.check whether user exist
+        // 1. Check whether user exists
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found with Id "+userId));
+                .orElseThrow(() ->
+                        new UserNotFoundException(
+                                "User not found with Id " + userId));
 
-        //2.check whether resume exist
-        Optional<Resume> existingResume = resumeRepository.findByUserId(userId);
+        // 2. Check whether resume already exists
+        Optional<Resume> existingResume =
+                resumeRepository.findByUserId(userId);
+
         Resume resume;
 
-        if(existingResume.isPresent()){
+        if (existingResume.isPresent()) {
 
-            //update existing resume
-            resume=existingResume.get();
+            // Update existing resume
+            resume = existingResume.get();
 
-            //delete old file
-            Files.deleteIfExists(Paths.get(resume.getFilePath()));
-        }else {
-            //create new resume
+            // Delete old file
+            Files.deleteIfExists(
+                    Paths.get(resume.getFilePath()));
+
+        } else {
+
+            // Create new resume
             resume = new Resume();
             resume.setUser(user);
         }
@@ -58,11 +74,19 @@ public class ResumeService {
         Files.createDirectories(Paths.get(uploadDir));
 
         // 4. Generate unique filename
-        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+        String fileName =
+                System.currentTimeMillis()
+                        + "_"
+                        + file.getOriginalFilename();
 
         // 5. Save file to disk
         Path path = Paths.get(uploadDir + fileName);
-        Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+
+        Files.copy(
+                file.getInputStream(),
+                path,
+                StandardCopyOption.REPLACE_EXISTING
+        );
 
         // 6. Update Resume entity
         resume.setFileName(fileName);
@@ -71,23 +95,37 @@ public class ResumeService {
         resume.setFileSize(file.getSize());
 
         // 7. Save in database
-        return resumeRepository.save(resume);
+        Resume savedResume =
+                resumeRepository.save(resume);
+
+        // 8. Convert Entity → Response DTO
+        return resumeMapper.toResponseDto(savedResume);
     }
 
-    public Resume getResumeByUserId(int userId){
-        return resumeRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResumeNotFoundException("No resume found with id "+userId));
+    public ResumeResponseDto getResumeByUserId(int userId) {
+
+        Resume resume = resumeRepository.findByUserId(userId)
+                .orElseThrow(() ->
+                        new ResumeNotFoundException(
+                                "No resume found with user id "
+                                        + userId));
+
+        return resumeMapper.toResponseDto(resume);
     }
 
     public void deleteResume(int userId) throws IOException {
+
         Resume resume = resumeRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResumeNotFoundException("No resume found with id "+userId));
+                .orElseThrow(() ->
+                        new ResumeNotFoundException(
+                                "No resume found with user id "
+                                        + userId));
 
         // Delete file from storage
-        Files.deleteIfExists(Paths.get(resume.getFilePath()));
+        Files.deleteIfExists(
+                Paths.get(resume.getFilePath()));
 
-        //Delete db records
+        // Delete DB record
         resumeRepository.delete(resume);
     }
-
 }

@@ -1,0 +1,71 @@
+package com.srihari.jobpilot.dto;
+
+
+import com.srihari.jobpilot.entity.EmploymentType;
+import com.srihari.jobpilot.entity.Source;
+import com.srihari.jobpilot.entity.WorkMode;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDate;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class JobRequestDto {
+
+    @NotBlank(message = "Job title is required")
+    @Size(min = 3, max = 100, message = "Job title must be between 3 and 100 characters")
+    private String title;
+
+    @NotBlank(message = "Company name is required")
+    @Size(min = 2, max = 100, message = "Company name must be between 2 and 100 characters")
+    private String company;
+
+    @Size(max = 100, message = "Location cannot exceed 100 characters")
+    private String location;
+
+    @NotBlank(message = "Experience is required")
+    @Size(max = 50, message = "Experience cannot exceed 50 characters")
+    private String experience;
+
+    @NotBlank(message = "Qualification is required")
+    @Size(max = 100, message = "Qualification cannot exceed 100 characters")
+    private String qualification;
+
+    @Size(max = 50, message = "Salary cannot exceed 50 characters")
+    private String salary;
+
+    @NotBlank(message = "Skills are required")
+    @Size(max = 500, message = "Skills cannot exceed 500 characters")
+    private String skills;
+
+    @NotBlank(message = "Job description is required")
+    @Size(min = 20, max = 5000,
+            message = "Job description must be between 20 and 5000 characters")
+    private String description;
+
+    @NotNull(message = "Employment type is required")
+    private EmploymentType employmentType;
+
+    @NotNull(message = "Work mode is required")
+    private WorkMode workMode;
+
+    @NotBlank(message = "Apply URL is required")
+    @Size(max = 500, message = "Apply URL cannot exceed 500 characters")
+    private String applyUrl;
+
+    @NotNull(message = "Job source is required")
+    private Source source;
+
+    @NotNull(message = "Posted date is required")
+    private LocalDate postedDate;
+
+    private LocalDate endDate;
+}

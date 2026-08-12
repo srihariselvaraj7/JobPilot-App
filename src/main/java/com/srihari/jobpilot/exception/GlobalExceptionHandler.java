@@ -122,4 +122,22 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
+
+    @ExceptionHandler(JobAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleJobAlreadyExistsException(
+            JobAlreadyExistsException exception,
+            WebRequest webRequest) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                exception.getMessage(),
+                webRequest.getDescription(false),
+                null
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(errorResponse);
+    }
 }

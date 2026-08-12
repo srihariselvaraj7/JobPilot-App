@@ -1,6 +1,7 @@
 package com.srihari.jobpilot.controller;
 
-import com.srihari.jobpilot.entity.User;
+import com.srihari.jobpilot.dto.UserRequestDto;
+import com.srihari.jobpilot.dto.UserResponseDto;
 import com.srihari.jobpilot.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -15,38 +16,55 @@ public class UserController {
 
     private final UserService userService;
 
-    public UserController(UserService userService){
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
     @PostMapping
-    public ResponseEntity<User> saveUser(@Valid @RequestBody User user){
-        User savedUser = userService.saveUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(savedUser);
+    public ResponseEntity<UserResponseDto> saveUser(
+            @Valid @RequestBody UserRequestDto userRequestDto) {
+
+        UserResponseDto response = userService.saveUser(userRequestDto);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers(){
-        return ResponseEntity.ok(userService.getAllUser());
+    public ResponseEntity<List<UserResponseDto>> getAllUser() {
+
+        List<UserResponseDto> users = userService.getAllUser();
+
+        return ResponseEntity.ok(users);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable int id){
-        return ResponseEntity.ok(userService.getUserById(id));
-    }
+    public ResponseEntity<UserResponseDto> getUserById(
+            @PathVariable int id) {
 
-    @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@Valid @RequestBody User updatedUser,
-                                           @PathVariable int id){
-        User user = userService.updateUser(updatedUser, id);
+        UserResponseDto user = userService.getUserById(id);
+
         return ResponseEntity.ok(user);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable int id){
-        userService.deleteUserById(id);
-        return ResponseEntity.ok("User deleted successfully.");
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponseDto> updateUser(
+            @PathVariable int id,
+            @Valid @RequestBody UserRequestDto updatedUserDto) {
+
+        UserResponseDto updatedUser =
+                userService.updateUser(updatedUserDto, id);
+
+        return ResponseEntity.ok(updatedUser);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUserById(
+            @PathVariable int id) {
+
+        userService.deleteUserById(id);
+
+        return ResponseEntity.noContent().build();
+    }
 }
