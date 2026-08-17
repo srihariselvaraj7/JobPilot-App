@@ -2,7 +2,9 @@ package com.srihari.jobpilot.service;
 
 import com.srihari.jobpilot.dto.JobRequestDto;
 import com.srihari.jobpilot.dto.JobResponseDto;
+import com.srihari.jobpilot.entity.EmploymentType;
 import com.srihari.jobpilot.entity.Job;
+import com.srihari.jobpilot.entity.WorkMode;
 import com.srihari.jobpilot.exception.JobAlreadyExistsException;
 import com.srihari.jobpilot.exception.JobNotFoundException;
 import com.srihari.jobpilot.mapper.JobMapper;
@@ -104,5 +106,62 @@ public class JobService {
                         ));
 
         jobRepository.delete(existingJob);
+    }
+
+    public List<JobResponseDto> searchByTitle(String title) {
+
+        return jobRepository.findByTitleContainingIgnoreCase(title)
+                .stream()
+                .map(jobMapper::toResponseDto)
+                .toList();
+    }
+
+    public List<JobResponseDto> searchByCompany(String company) {
+
+        return jobRepository.findByCompanyContainingIgnoreCase(company)
+                .stream()
+                .map(jobMapper::toResponseDto)
+                .toList();
+    }
+
+    public List<JobResponseDto> searchBySkills(String skills) {
+
+        return jobRepository.findBySkillsContainingIgnoreCase(skills)
+                .stream()
+                .map(jobMapper::toResponseDto)
+                .toList();
+    }
+
+    public List<JobResponseDto> searchByLocation(String location) {
+
+        return jobRepository.findByLocationContainingIgnoreCase(location)
+                .stream()
+                .map(jobMapper::toResponseDto)
+                .toList();
+    }
+
+    public List<JobResponseDto> searchByExperience(String experience) {
+
+        return jobRepository.findByExperienceContainingIgnoreCase(experience)
+                .stream()
+                .map(jobMapper::toResponseDto)
+                .toList();
+    }
+
+    public List<JobResponseDto> searchByWorkMode(WorkMode workMode) {
+
+        return jobRepository.findByWorkMode(workMode)
+                .stream()
+                .map(jobMapper::toResponseDto)
+                .toList();
+    }
+
+    public List<JobResponseDto> searchByEmploymentType(
+            EmploymentType employmentType) {
+
+        return jobRepository.findByEmploymentType(employmentType)
+                .stream()
+                .map(jobMapper::toResponseDto)
+                .toList();
     }
 }
