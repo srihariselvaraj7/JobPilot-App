@@ -6,6 +6,8 @@ import com.srihari.jobpilot.entity.EmploymentType;
 import com.srihari.jobpilot.entity.WorkMode;
 import com.srihari.jobpilot.service.JobService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -124,5 +126,36 @@ public class JobController {
         return ResponseEntity.ok(
                 jobService.searchByEmploymentType(employmentType)
         );
+    }
+
+    @GetMapping("/page")
+    public ResponseEntity<Page<JobResponseDto>> getAllJobs(Pageable pageable) {
+        Page<JobResponseDto> jobs = jobService.getAllJobs(pageable);
+        return ResponseEntity.ok(jobs);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<JobResponseDto>> searchJobs(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String company,
+            @RequestParam(required = false) String skills,
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) String experience,
+            @RequestParam(required = false) WorkMode workMode,
+            @RequestParam(required = false) EmploymentType employmentType,
+            Pageable pageable) {
+
+        Page<JobResponseDto> jobs = jobService.searchJobs(
+                title,
+                company,
+                skills,
+                location,
+                experience,
+                workMode,
+                employmentType,
+                pageable
+        );
+
+        return ResponseEntity.ok(jobs);
     }
 }

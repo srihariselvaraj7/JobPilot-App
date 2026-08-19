@@ -4,10 +4,11 @@ import com.srihari.jobpilot.entity.EmploymentType;
 import com.srihari.jobpilot.entity.Job;
 import com.srihari.jobpilot.entity.WorkMode;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.List;
 
-public interface JobRepository extends JpaRepository<Job, Integer> {
+public interface JobRepository extends JpaRepository<Job, Integer>, JpaSpecificationExecutor<Job>{
 
     boolean existsByApplyUrl(String applyUrl);
     List<Job> findByTitleContainingIgnoreCase(String title);

@@ -10,6 +10,10 @@ import com.srihari.jobpilot.exception.JobNotFoundException;
 import com.srihari.jobpilot.mapper.JobMapper;
 import com.srihari.jobpilot.repository.JobRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.srihari.jobpilot.specification.JobSpecification;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 
@@ -163,5 +167,69 @@ public class JobService {
                 .stream()
                 .map(jobMapper::toResponseDto)
                 .toList();
+    }
+
+    public Page<JobResponseDto> getAllJobs(Pageable pageable) {
+        return jobRepository.findAll(pageable)
+                .map(jobMapper::toResponseDto);
+    }
+
+    public Page<JobResponseDto> searchJobs(
+            String title,
+            String company,
+            String skills,
+            String location,
+            String experience,
+            WorkMode workMode,
+            EmploymentType employmentType,
+            Pageable pageable) {
+
+        Specification<Job> specification = Specification.where(null);
+
+        if (title != null && !title.isBlank()) {
+            specification = specification.and(
+                    JobSpecification.hasTitle(title)
+            );
+        }
+
+        if (company != null && !company.isBlank()) {
+            specification = specification.and(
+                    JobSpecification.hasCompany(company)
+            );
+        }
+
+        if (skills != null && !skills.isBlank()) {
+            specification = specification.and(
+                    JobSpecification.hasSkills(skills)
+            );
+        }
+
+        if (location != null && !location.isBlank()) {
+            specification = specification.and(
+                    JobSpecification.hasLocation(location)
+            );
+        }
+
+        if (experience != null && !experience.isBlank()) {
+            specification = specification.and(
+                    JobSpecification.hasExperience(experience)
+            );
+        }
+
+        if (workMode != null) {
+            specification = specification.and(
+                    JobSpecification.hasWorkMode(workMode)
+            );
+        }
+
+        if (employmentType != null) {
+            specification = specification.and(
+                    JobSpecification.hasEmploymentType(employmentType)
+            );
+        }
+
+        return jobRepository
+                .findAll(specification, pageable)
+                .map(jobMapper::toResponseDto);
     }
 }
